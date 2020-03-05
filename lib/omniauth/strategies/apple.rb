@@ -44,10 +44,16 @@ module OmniAuth
       def id_info
         id_token = request.params['id_token'] || access_token.params['id_token']
         log(:info, "id_token: #{id_token}")
-        @id_info ||= ::JWT.decode(id_token, nil, false)[0] # payload after decoding
+        log(:info, "access_token: #{access_token}")
+        log(:info, "raw_info_from_access_token: #{access_token.try(:get, '/userinfo')}")
+        log(:info, "raw_info_from_access_token unparsed: #{access_token.try(:get, '/me')}")
+        @id_info ||= ::JWT.decode(id_token, nil, false)[0].tap{|i| log(:info, "id_info: #{i}") }
       end
 
       def user_info
+        log(:info, "full_request_params_xxx: #{request.params.to_h}")
+        log(:info, "full_request_params_user: #{request.params['user']}")
+
         return {} unless request.params['user'].present?
 
         log(:info, "user_info: #{request.params['user']}")
